@@ -13,5 +13,5 @@
 - My largest struggle was working out cv2.fitLine(). The documentation was just vague enough for me to have to experiment to get it working. At first I thought it returned a second point along the line, so when I tried to draw a line with it (after using int(), which set the values to zero), I kept getting a line drawn to the origin. This took me a while to figure out until I finally worked out that fitLine returns a point on the line as well as a normalized unit vector. With this, I was able to use some deceptively tricky math to workout the borders
 
 ## What libraries are used?
-OpenCV
-Numpy
+- OpenCV
+- Numpy
