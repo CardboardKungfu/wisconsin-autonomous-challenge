@@ -3,12 +3,24 @@ import cv2 as cv
 
 # Create resize function so that window isn't too large
 # Changing the scale will affect the image. If the ratio is too large, the blurring isn't effective, if it's too small, some cones are lost
-def resizeImg(frame, scale=0.5):
+def resizeImg(frame, scale=0.25):
     width = int(frame.shape[1] * scale)
     height = int(frame.shape[0] * scale)
     dimensions = (width, height)
 
     return cv.resize(frame, dimensions, interpolation=cv.INTER_AREA)
+
+# Use existing point to draw a line that extends to the borders of the window
+def drawLine(img,x1,x2,y1,y2):
+	m = (y2-y1) / (x2 - x1)
+	w = img.shape[:2][1]
+	px = 0
+	py = -(x1-0) * m + y1
+
+	qx = w
+	qy = -(x2-w) * m + y2
+
+	return cv.line(img, [int(px), int(py)], [int(qx), int(qy)], (0, 0, 255), 2)
 
 # Read in image
 img_raw = cv.imread("red_cones.png")
@@ -31,11 +43,11 @@ img_masked = cv.bitwise_and(img, img, mask=mask)
 # cv.imshow("Masked cones", img_masked)
 
 # MORPH_OPEN uses erosion followed by dilation, specifically in that order. It removes the unwanted artifacts in the top middle created by the red lights, alarm clock, and the reflection
-kernel = np.ones((5, 5))
+kernel = np.ones((3, 3))
 img_opened = cv.morphologyEx(img_masked, cv.MORPH_OPEN, kernel)
 # cv.imshow("Opened Image", img_opened)
 
-median_blur = cv.medianBlur(img_opened, 7)
+median_blur = cv.medianBlur(img_opened, 3)
 # cv.imshow("Median Blur", median_blur)
 
 canny = cv.Canny(median_blur, 125, 175)
@@ -51,6 +63,7 @@ cv.drawContours(blank, contours, -1, (0,0,255), 1)
 # Contours on the left and right
 vertical_center = blank.shape[1] / 2
 
+# Arrays for the contours on the left and right of our image
 cones_left = []
 cones_right = []
 
@@ -65,29 +78,34 @@ for i in contours:
 		cv.circle(blank, (cx, cy), 2, (0, 0, 255), -1)
 		# print(f"x: {cx} y: {cy}")
 		if cx < vertical_center:
-			cones_left.append(i[0])
+			cones_left.append((cx, cy))
 		else:
-			cones_right.append(i[0])
+			cones_right.append((cx, cy))
 
-# cv.imshow("Contours with Centroid", blank)
+# Fit line takes our points, finds a line of best fit, and then returns a 
+# point on that line as well as a normalized vector
+left_vx, left_vy, left_cx, left_cy = cv.fitLine(np.array(cones_left), cv.DIST_L2, 0, 0.01, 0.01)
 
-left_fitline = cv.fitLine(np.array(cones_left), cv.DIST_L2, 0, 0.01, 0.01)
-right_fitline = cv.fitLine(np.array(cones_right), cv.DIST_L2, 0, 0.01, 0.01)
+left_x1 = int(left_cx[0])
+left_x2 = left_cx + (left_vx * 10)
+left_y1 = int(left_cy[0])
+left_y2 = left_cy + (left_vy * 10)
 
-# compute t0 for y=0 and t1 for y=img.shape[0]: (y-y0)/vy
-t0 = (0 - left_fitline[3]) / left_fitline[1]
-t1 = (blank.shape[0] - left_fitline[3]) / left_fitline[1]
+drawLine(img, left_x1, left_x2, left_y1,left_y2)
 
-# plug into the line formula to find the two endpoints, p0 and p1
-# to plot, we need pixel locations so convert to int
-p0 = (left_fitline[2:4] + (t0 * left_fitline[0:2]))
-p1 = (left_fitline[2:4] + (t1 * left_fitline[0:2]))
+right_vx, right_vy, right_cx, right_cy = cv.fitLine(np.array(cones_right), cv.DIST_L2, 0, 0.01, 0.01)
 
-# draw the line. For my version of opencv, it wants tuples so we
-# flatten the arrays and convert
-# args: cv2.line(image, p0, p1, color, thickness)
-cv.line(blank, p0, p1, (0, 255, 0), 10)
-cv.imshow("Drawn lines", blank)
+# print(f'right_vx: {right_vx}, right_vy: {right_vy}')
+
+right_x1 = int(right_cx[0])
+right_x2 = right_cx + (right_vx * 10)
+right_y1 = int(right_cy[0])
+right_y2 = right_cy + (right_vy * 10)
+
+drawLine(img, right_x1, right_x2, right_y1, right_y2)
+
+cv.imshow("Drawn lines", img)
+cv.imwrite("answer.png", img)
 
 cv.waitKey(0)
 cv.destroyAllWindows()
