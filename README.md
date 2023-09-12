@@ -1,4 +1,4 @@
-# Wisconsin-Autonomous Perception Challenge
+# Wisconsin Autonomous Perception Challenge
 
 ## Methodology
 1. This is my first project in OpenCV, so initially I first thought that I would need to train a model on recognizing cones, use it to label the cones, and then draw a line through their centers of mass. However, I did a lot of Googling and discovered that Hue Saturation Value (HSV) was a thing. 
