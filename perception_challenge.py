@@ -2,7 +2,8 @@ import numpy as np
 import cv2 as cv
 
 # Create resize function so that window isn't too large
-# Changing the scale will affect the image. If the ratio is too large, the blurring isn't effective, if it's too small, some cones are lost
+# Changing the scale will affect the image. If the ratio is too large, 
+# the blurring isn't effective, if it's too small, some cones are lost
 def resizeImg(frame, scale=0.25):
     width = int(frame.shape[1] * scale)
     height = int(frame.shape[0] * scale)
@@ -32,7 +33,8 @@ cv.imshow("Cones", img)
 # Create blank to draw our mask on
 blank = np.zeros(img.shape, dtype='uint8')
 
-# Create a mask by changing the colors to create contrast, then use that to threshold based on a red-ish color value. 
+# Create a mask by changing the colors to create contrast, 
+# then use that to threshold based on a red-ish color value. 
 img_RGB = cv.cvtColor(img, cv.COLOR_BGR2RGB)
 img_HSV = cv.cvtColor(img_RGB, cv.COLOR_RGB2HSV)
 
@@ -42,7 +44,8 @@ mask = cv.inRange(img_HSV,lower,upper)
 img_masked = cv.bitwise_and(img, img, mask=mask)
 # cv.imshow("Masked cones", img_masked)
 
-# MORPH_OPEN uses erosion followed by dilation, specifically in that order. It removes the unwanted artifacts in the top middle created by the red lights, alarm clock, and the reflection
+# MORPH_OPEN uses erosion followed by dilation, specifically in that order. 
+# It removes the unwanted artifacts in the top middle created by the red lights, alarm clock, and the reflection
 kernel = np.ones((3, 3))
 img_opened = cv.morphologyEx(img_masked, cv.MORPH_OPEN, kernel)
 # cv.imshow("Opened Image", img_opened)
@@ -103,9 +106,12 @@ right_y1 = int(right_cy[0])
 right_y2 = right_cy + (right_vy * 10)
 
 drawLine(img, right_x1, right_x2, right_y1, right_y2)
-
 cv.imshow("Drawn lines", img)
+
+# Save the image
 cv.imwrite("answer.png", img)
 
+# Housekeeping. waitKey(0) allows us to close all the windows when we press any key
+# destroyAllWindows is just overkill to make sure nothing slips past
 cv.waitKey(0)
 cv.destroyAllWindows()
