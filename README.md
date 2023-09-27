@@ -1,4 +1,4 @@
-# Wisconsin-Autonomous Perception Challenge
+# Wisconsin Autonomous Perception Challenge
 
 ## Methodology
 1. This is my first project in OpenCV, so initially I first thought that I would need to train a model on recognizing cones, use it to label the cones, and then draw a line through their centers of mass. However, I did a lot of Googling and discovered that Hue Saturation Value (HSV) was a thing. 
@@ -13,5 +13,5 @@
 - My largest struggle was working out cv2.fitLine(). The documentation was just vague enough for me to have to experiment to get it working. At first I thought it returned a second point along the line, so when I tried to draw a line with it (after using int(), which set the values to zero), I kept getting a line drawn to the origin. This took me a while to figure out until I finally worked out that fitLine returns a point on the line as well as a normalized unit vector. With this, I was able to use some deceptively tricky math to workout the borders
 
 ## What libraries are used?
-OpenCV
-Numpy
+- OpenCV
+- Numpy
