@@ -42,6 +42,7 @@ lower = np.array([0,135,160])
 upper = np.array([179,255,255])
 mask = cv.inRange(img_HSV,lower,upper)
 img_masked = cv.bitwise_and(img, img, mask=mask)
+# Uncomment to see the various stages
 # cv.imshow("Masked cones", img_masked)
 
 # MORPH_OPEN uses erosion followed by dilation, specifically in that order. 
